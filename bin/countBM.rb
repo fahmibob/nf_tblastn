@@ -43,16 +43,24 @@ end
 
 
 def calculate_enzymes(inputData,reference=nil)
-  enzyme_ref=[]
-  enzyme_count=[]
-  for i in 0..reference.keys.count-1
-    enzyme_ref.push("#{reference.keys[i]}")
-    enzyme_count.push(0)
+  unless reference == nil
+    enzyme_ref=[]
+    enzyme_count=[]
+    for i in 0..reference.keys.count-1
+      enzyme_ref.push("#{reference.keys[i]}")
+      enzyme_count.push(0)
+    end
+    for i in 0..inputData.count-1
+      unless (reference.find {|key, value| value.include?(inputData[i].split("\t")[0])}).nil?
+        enzyme_count[enzyme_ref.index(reference.find {|key, value| value.include?(inputData[i].split("\t")[0])}.first)]+=1
+      end
+    end
+    return enzyme_count
+  else
+    result=["#{inputData.count}"]
+    return result
   end
-  for i in 0..k.count-1
-    enzyme_count[enzyme_ref.index(reference.find {|key, value| value.include?(k[i])}.first)]+=1
-  end
-  return enzyme_count
+
 end
 
 #filter blastout using set of identity from json file and bitscore
@@ -62,9 +70,9 @@ def filter_identity(blastout, bitscore, blast_type, threshold_id=30, jsonfile=ni
     reference = JSON.parse(File.read(jsonfile))
     idFilteredData=File.readlines(blastout).select {|line|
       unless line[0] == '#'
-        if blast_type == "blastx"
+        if blast_type == "blastx" && reference.find { |key, values| values.include?(line.split("\t")[1])} != nil
           line.split("\t")[2].to_f > (reference.find { |key, values| values.include?(line.split("\t")[1])}.first).split("_")[1].to_f && line.split("\t")[11].to_i > bitscore
-        else
+        elsif reference.find { |key, values| values.include?(line.split("\t")[0])} != nil
           line.split("\t")[2].to_f > (reference.find { |key, values| values.include?(line.split("\t")[0])}.first).split("_")[1].to_f && line.split("\t")[11].to_i > bitscore
         end
       end

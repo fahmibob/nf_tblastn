@@ -21,7 +21,7 @@ params.threads=4
 params.outfmt=6
 
 //count tblastn option
-params.reference="$baseDir/ref/reftblastn.json"
+params.reference="$baseDir/ref/p450_20.json"
 params.module="$baseDir/bin/countBM.rb"
 params.bitscore=50
 params.countenzyme=true
@@ -63,7 +63,7 @@ workflow {
     }
   } else if (params.blastout) {
 
-    Channel.fromPath(params.tblastn)
+    Channel.fromPath(params.blastout)
       .map {file -> tuple(file.simpleName, file)}
       .set{blastoutCH}
     if (params.filterbyFile) {
@@ -258,7 +258,7 @@ process tblastn {
 
 
 process tblastnOut_count {
-  errorStrategy 'ignore'
+  //errorStrategy 'ignore'
   maxForks params.forking
   input:
   tuple val(sampleName), path(data)
@@ -268,6 +268,6 @@ process tblastnOut_count {
 
   script:
   """
-  ruby -r '$params.module' -e 'filter_identity("$data", "$params.bitscore", "tblastn", 40, "$params.reference")' > $sampleName'.out'
+  ruby -r '$params.module' -e 'filter_identity("$data", $params.bitscore, "tblastn", 40, "$params.reference")' > $sampleName'.out'
   """
 }
