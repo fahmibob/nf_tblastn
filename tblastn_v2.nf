@@ -165,7 +165,7 @@ process window_masking {
 
 process rundustmasker {
   publishDir "$baseDir/DB/$params.job", mode: 'copy'
-  
+
   maxForks params.forking
 
   input:
@@ -268,6 +268,6 @@ process tblastnOut_count {
 
   script:
   """
-  ruby -r '$params.module' -e 'filter_identity("$data", "$params.reference", $params.bitscore, "tblastn")' > $sampleName'.out'
+  ruby -r '$params.module' -e 'filter_identity("$data", "$params.bitscore", "tblastn", 40, "$params.reference")' > $sampleName'.out'
   """
 }

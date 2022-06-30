@@ -1,4 +1,4 @@
-
+require 'json'
 def ranges_overlap?(range_a, range_b)
   range_b.begin <= range_a.end && range_a.begin <= range_b.end
 end
@@ -42,49 +42,43 @@ def filter_overlapped_contigs(aryblasout,blast_type)
 end
 
 
-def calculate_enzymes(inputData,reference)
-  bahd,doxc,fmo,omt,p450,ppo,pt,tps,ugt,missing=0,0,0,0,0,0,0,0,0,0
-  inputData.each do |f|
-    case reference.find {|key, value| value.include?(f.split("\t")[0])}.first
-    when "TRITERPENE_35"
-      bahd+=1
-    when "DOXC_40"
-      doxc+=1
-    when "FMO_35"
-      fmo+=1
-    when "OMT_30"
-      omt+=1
-    when "P450_40"
-      p450+=1
-    when "PPO_40"
-      ppo+=1
-    when "PT_35"
-      pt+=1
-    when "TPS_30"
-      tps+=1
-    when "UGT_45"
-      ugt+=1
-    else
-      missing+=1
-    end
+def calculate_enzymes(inputData,reference=nil)
+  enzyme_ref=[]
+  enzyme_count=[]
+  for i in 0..reference.keys.count-1
+    enzyme_ref.push("#{reference.keys[i]}")
+    enzyme_count.push(0)
   end
-  return [bahd,doxc,fmo,omt,p450,ppo,pt,tps,ugt,missing]
+  for i in 0..k.count-1
+    enzyme_count[enzyme_ref.index(reference.find {|key, value| value.include?(k[i])}.first)]+=1
+  end
+  return enzyme_count
 end
 
 #filter blastout using set of identity from json file and bitscore
-def filter_identity(blastout, jsonfile, bitscore, blast_type)
+def filter_identity(blastout, bitscore, blast_type, threshold_id=30, jsonfile=nil)
   filename=File.basename(blastout, ".blastout")
-  reference = JSON.parse(File.read(jsonfile))
-  idFilteredData=File.readlines(blastout).select {|line|
-    unless line[0] == '#'
-      if blast_type == "blastx"
-        line.split("\t")[2].to_f > (reference.find { |key, values| values.include?(line.split("\t")[1])}.first).split("_")[1].to_f && line.split("\t")[11].to_i > bitscore
-      else
-        line.split("\t")[2].to_f > (reference.find { |key, values| values.include?(line.split("\t")[0])}.first).split("_")[1].to_f && line.split("\t")[11].to_i > bitscore
+  unless jsonfile == nil
+    reference = JSON.parse(File.read(jsonfile))
+    idFilteredData=File.readlines(blastout).select {|line|
+      unless line[0] == '#'
+        if blast_type == "blastx"
+          line.split("\t")[2].to_f > (reference.find { |key, values| values.include?(line.split("\t")[1])}.first).split("_")[1].to_f && line.split("\t")[11].to_i > bitscore
+        else
+          line.split("\t")[2].to_f > (reference.find { |key, values| values.include?(line.split("\t")[0])}.first).split("_")[1].to_f && line.split("\t")[11].to_i > bitscore
+        end
       end
-    end
-  }
-  ovFilteredData=filter_overlapped_contigs(idFilteredData, blast_type)
-  enzymeAmount=calculate_enzymes(ovFilteredData,reference)
+    }
+    ovFilteredData=filter_overlapped_contigs(idFilteredData, blast_type)
+    enzymeAmount=calculate_enzymes(ovFilteredData, reference)
+  else
+    idFilteredData=File.readlines(blastout).select {|line|
+      unless line[0] == '#'
+        line.split("\t")[2].to_f > threshold_id && line.split("\t")[11].to_i > bitscore
+      end
+    }
+    ovFilteredData=filter_overlapped_contigs(idFilteredData, blast_type)
+    enzymeAmount=calculate_enzymes(ovFilteredData)
+  end
   puts "#{filename}\t#{enzymeAmount.join("\t")}\t#{ovFilteredData.count}"
 end
