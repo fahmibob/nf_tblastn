@@ -7,7 +7,7 @@ params.filterbyFile=false
 
 //tdecode
 params.tdecode=false
-params.dbName="$baseDir/tdecodeDB/ens_min_prot"
+params.dbName="$baseDir/tdecodeDB/plantcayme"
 
 //makeblastdb option
 params.tblastn=false
@@ -16,7 +16,7 @@ params.dustmask=false
 params.windowmask=false
 
 //tblastn option
-params.query="$baseDir/query/compiledquery.fasta"
+params.query="$baseDir/query/Arabidopsisthaliana-full.fa"
 params.threads=4
 params.outfmt=6
 
@@ -268,6 +268,6 @@ process tblastnOut_count {
 
   script:
   """
-  ruby -r '$params.module' -e 'filter_identity("$data", $params.bitscore, "tblastn", 40, "$params.reference")' > $sampleName'.out'
+  ruby -r '$params.module' -e 'filter_identity("$data", $params.bitscore, "tblastn", 40)' > $sampleName'.out'
   """
 }
