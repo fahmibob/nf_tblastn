@@ -165,7 +165,7 @@ process window_masking {
 
 process rundustmasker {
   publishDir "$baseDir/DB/$params.job", mode: 'copy'
-
+  errorStrategy 'ignore'
   maxForks params.forking
 
   input:
