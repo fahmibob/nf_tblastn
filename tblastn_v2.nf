@@ -78,6 +78,7 @@ workflow {
 }
 
 process transdecoder {
+  publishDir "$baseDir/transdecoder/$params.job/$sampleName", mode: 'copy'
   maxForks params.forking
   errorStrategy 'ignore'
   input:
