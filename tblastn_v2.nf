@@ -7,7 +7,7 @@ params.filterbyFile=false
 
 //tdecode
 params.tdecode=false
-params.dbName="$baseDir/tdecodeDB/plantcayme"
+params.dbName="$baseDir/tdecodeDB/ens_min_prot"
 
 //makeblastdb option
 params.tblastn=false
@@ -16,12 +16,12 @@ params.dustmask=false
 params.windowmask=false
 
 //tblastn option
-params.query="$baseDir/query/Arabidopsisthaliana-full.fa"
+params.query="$baseDir/query/compiledquery.fasta"
 params.threads=4
 params.outfmt=6
 
 //count tblastn option
-params.reference="$baseDir/ref/p450_20.json"
+params.reference="$baseDir/ref/reftblastn.json"
 params.module="$baseDir/bin/countBM.rb"
 params.bitscore=50
 params.countenzyme=true
